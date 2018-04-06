@@ -1,4 +1,4 @@
 # kinect
-<p>interactive light instalation
+interactive light instalation
 for processing version 2
-with depth camera and particle system</p>
+with depth camera and particle system
