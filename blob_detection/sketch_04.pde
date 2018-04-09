@@ -3,6 +3,7 @@ SimpleOpenNI kinect;
 int c=0;
 IntList cIndex = new IntList();
 int spaceBlobs=10;
+int tol=10;
 ArrayList<Blob> blobs;
 void setup(){
  size(640,480);
@@ -103,7 +104,10 @@ void createBlob(){
  }}
  for(Blob b:blobs){
   if(b.area()>100){
-  b.display();} 
+     if(b.isCircle()==true){
+  println("circle");}
+  b.display();
+ } 
  }
 }
 
