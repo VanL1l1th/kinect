@@ -1,5 +1,5 @@
-# sketch_03
+# ir camera
 simple conture/edge detector.
-for proccesing 2
-works with the ircamera and ir-reflectors
-to detect contures/edges of a ir-reflector
+simple blob detector.
+for proccesing v 2
+works with the ir camera and ir-reflectors.
