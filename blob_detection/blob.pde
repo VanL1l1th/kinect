@@ -3,6 +3,7 @@ int minx;
 int maxx;
 int miny;
 int maxy;
+color col=color(255,0,0);
 ArrayList<PVector> points;
 Blob(int x,int y){
  minx=x; maxx=x; miny=y; maxy=y;
@@ -18,7 +19,7 @@ void addp(int x,int y){
 void display(){
   rectMode(CORNERS);
   fill(255,10);
-  stroke(255,0,0);
+  stroke(col);
   strokeWeight(2);
  rect(minx,miny,maxx,maxy); 
 }
@@ -36,5 +37,10 @@ boolean isNear(int x,int y){
   if(dis<(spaceBlobs*spaceBlobs)){
   return true;}
   else{return false; }
+ }
+ boolean isCircle(){
+   if((maxx-minx)<(maxy-miny)+tol&&(maxx-minx)>(maxy-miny)-tol){
+     col=color(0,255,0); return true;}
+     else{return false;}
  }
 }
