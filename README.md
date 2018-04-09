@@ -1,3 +1,4 @@
-# sketch_02
+# depth cam
 for processing version 2
-with depth camera and particle system
+with depth camera
+proccessing v2 kinect v1
