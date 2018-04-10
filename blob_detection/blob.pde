@@ -38,9 +38,11 @@ boolean isNear(int x,int y){
   return true;}
   else{return false; }
  }
- boolean isCircle(){
+ void circles(){
    if((maxx-minx)<(maxy-miny)+tol&&(maxx-minx)>(maxy-miny)-tol){
-     col=color(0,255,0); return true;}
-     else{return false;}
+     if((maxx-minx)*(maxy-miny)*0.6<points.size()){
+     col=color(0,255,0); }
+   else if((maxx-minx)*(maxy-miny)*0.4<points.size()){col=color(0,0,255);}}
+     
  }
 }
