@@ -104,8 +104,7 @@ void createBlob(){
  }}
  for(Blob b:blobs){
   if(b.area()>100){
-     if(b.isCircle()==true){
-  println("circle");}
+  b.circles();
   b.display();
  } 
  }
