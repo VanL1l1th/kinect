@@ -44,20 +44,20 @@ if(blobs.get(i).col==color(0,255,0)){
 markers.add(new Marker(blobs.get(i).index(),1,null,null)); add=true;}
 else if(blobs.get(i).col==color(0,0,255)){
 markers.add(new Marker(blobs.get(i).index(),2,null,null)); add=true;}
-else{
+else if(add==false){
 PVector p1= depthPoints[blobs.get(i).index()];
 for(int j=blobs.size()-1;j>=0;j--){
 PVector p2= depthPoints[blobs.get(j).index()];
 float dist3=sqrt(sq(p1.x-p2.x)+sq(p1.y-p2.y)+sq(p1.z-p2.z));
-if(dist3>90&&dist3<110){markers.add(new Marker(blobs.get(i).index(),3,p1,p2)); add=true;}
-else if(dist3>110&&dist3<200){markers.add(new Marker(blobs.get(i).index(),4,p1,p2)); add=true;}
+if(dist3>50&&dist3<120){markers.add(new Marker(blobs.get(i).index(),3,p1,p2)); add=true;}
+else if(dist3>120&&dist3<200){markers.add(new Marker(blobs.get(i).index(),4,p1,p2)); add=true;}
 if(add==true){blobs.get(j).bool=false;}}}
-if(add==false&&blobs.get(i).bool==true){markers.add(new Marker(blobs.get(i).index(),0,null,null));}
+if(add==false&&blobs.get(i).bool==true){markers.add(new Marker(blobs.get(i).index(),0,null,null)); println("wwwww");}
 blobs.remove(i);}
 blobs.clear();
 background(0);
 for(Marker m: markers){
-m.display();}
+m.display(); m.or();}
 
 }
 
