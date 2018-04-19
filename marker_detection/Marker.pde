@@ -17,4 +17,11 @@ class Marker{
     case 4: noStroke(); fill(255,229,204); ellipse(x,y,20,20); break; //two stripes with 15cm distance
   }
  }
+ void or(){
+  if(type==3||type==4){
+   float a=acos(or.z/or.mag());
+   stroke(255); strokeWeight(5);
+   line(x,y,x+(100*cos(a)),y+(100*sin(a)));
+  } 
+ }
 }
