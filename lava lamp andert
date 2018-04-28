@@ -1,0 +1,253 @@
+ArrayList<Leader> leaders = new ArrayList<Leader>();
+ArrayList<Follower> followers = new ArrayList<Follower>();
+PVector[] field;
+int spacing = 20, k=0, orbSize = 20, numLeaders = 10, numFollowers = 18;  //more leaders gives a more organic look when followers change leaders
+float vecScl = 3000;  //the size of the coloration giving the liquid effect
+
+Follower ff = new Follower(200,200);
+
+void setup() {
+  size(350,400);
+  background(0);
+  field = new PVector[width*height*2];
+  for(int x = 0; x<numLeaders; x++){
+    leaders.add(  new Leader(  floor(random(width)) , height  )  );
+  }
+  leaders.get(0).vel= new PVector(0,-0.5); //just to make it start with one going straight up
+  for(int x = 0; x<numFollowers; x++){
+    followers.add(  new Follower(  floor(random(width)) , height  )  );
+    followers.get(x).findLeader();
+  }
+  nextField();
+  
+  //info for the viewer:
+  //println("access code by clicking the button at the top : &lt;\/&gt;");
+  //println("This simulation runs slowly in the browser because it's doing alot of calculations.");
+  //println("Change the number of leaders, followers, and the size of the rectangle to customize.");
+  //println("More followers & leaders or a bigger rectangle will make it slower.");
+}
+
+void draw() {
+  background(0);
+ 
+ 
+  if(frameCount%500==0){ nextField(); }  //create a new field every now and then
+
+  for(Leader b : leaders){
+    b.applyField();
+    b.addDelay();
+    b.move();
+    b.edges(b.maxY);  //stagger the bottom edge for leaders to prevent clumping on the bottom edge
+    //b.show();  //cannot see this if doing the pixel manipulation, keep off for better performance
+  }
+  
+  for(Follower f: followers){
+    if(f.timeFollowing > 1000){
+      if(random(1)<0.3){
+        f.findLeader();
+      }else{
+        f.timeFollowing = 800;
+      }
+    }  
+    if(f.following!=null){
+      f.followLeader();
+    }
+    f.applyField();
+    f.move();
+    f.edges(height);
+    //f.show();  //cannot see this if doing the pixel manipulation, keep off for better performance
+  }
+
+  
+  showLava();
+  //showField();
+  
+ //============border around canvas
+//  stroke(0);
+//  noFill();
+//  strokeWeight(2);
+//  rect(0,0,width, height);
+ //=======================================
+
+}
+
+/******************************
+*   Render the lava pixel-by-pixel
+******************************/
+void showLava(){
+float sum = 255;
+  loadPixels();
+//  for(int x=1; x<width; x+=2){
+//    for(int y=1; y<height; y+=2){
+//      int index = x + y * width;
+//      pixels[index]= color(sum);
+//    }
+//  }
+  for(int x=0; x<width; x++){
+    for(int y=0; y<height; y++){
+    int index = x + y * width;
+    float d = 0;
+    sum = 0;
+      for(Leader l : leaders){
+        d = dist(x, y, l.pos.x, l.pos.y);
+        sum += l.blobRadius / d;
+      }
+      for(Follower f : followers){
+        d = dist(x, y, f.pos.x, f.pos.y);
+        sum +=  f.blobRadius / d;
+      }
+      if(sum>255) { sum = 255; }
+      if(sum<250) { sum/=3; }
+      pixels[index]= color(sum);
+    }
+  }
+  updatePixels();
+}
+
+
+/******************************
+*   Show the field vectors that move the lava around
+******************************/
+void showField(){
+  stroke(0);
+  for(int j = 0; j<=height; j+=spacing){
+    for(int i = 0; i<=width; i+=spacing){   //start in the middle of each square
+      int location = i + j * width;
+      PVector p = field[location];
+      pushMatrix();
+      translate(i, j);
+      rotate(p.heading());
+      line(0,0,p.mag()*vecScl,0);
+      ellipse(p.mag()*vecScl, 0, 2,2);
+      popMatrix();
+    }
+  }
+}
+
+
+/******************************
+*  Create a new field to prevent orbs from falling into a pattern
+******************************/
+void nextField(){
+  k+=random(3);
+  for(int j = 0; j<=height; j+=spacing){
+    float pMag = map(j, 0, height, spacing/vecScl, -spacing/vecScl);
+    for(int i = 0; i<=width; i+=spacing){  //start in the middle of each square
+      int location = i + j * width;
+      float angle = map(noise(i,j,k), 0, 1, PI, 0);
+      PVector p = PVector.fromAngle(angle);
+      p = PVector.mult(p, pMag);
+      field[location] = p;
+    }
+  }
+  class Follower extends Orb{
+
+  int timeFollowing;  //keep track of how many frames this orb has followed a leader
+  Leader following;   //the orb is this one following
+
+  Follower(int xPos, int yPos){
+    super(xPos, yPos);
+    this.vel = PVector.random2D();  //Followers can start with any velocity
+    this.following = null;  //
+    this.timeFollowing = 0;
+  }
+
+  void findLeader(){
+    Leader closest = null;
+    Leader last = this.following;  //remember the previous leader so it's not chosen again
+    float record = 999999999;  // should use Float.MAX_VALUE in IDE;
+    
+    for(Leader L : leaders){
+      if(L==last) { continue; }
+
+      float diff = this.pos.dist(L.pos);
+      
+      if(diff < record){
+        record = diff;
+        closest = L;
+      }
+      
+    }
+    
+    this.following = closest; 
+    this.timeFollowing = 0;  //reset following counter
+  }
+
+  void followLeader(){
+    if(this.following == null){ return; } //avoid null pointer, even though it should not occur
+    
+    PVector desired = PVector.sub( this.following.pos ,this.pos);  
+    this.vel.lerp(desired, 0.002);  //smaller lerp makes bigger "blobs", larger makes for tighter orbits
+    if(this.vel.mag()>2){
+      this.vel.setMag(2);  //don't let Followers move too fast, looks bad
+    }
+    this.timeFollowing++;  //track frames following
+  }
+
+}
+class Leader extends Orb{
+
+  int maxY;
+
+  Leader(int xPos, int yPos){
+    super(xPos, yPos);
+    this.vel = new PVector(0, random(0,2)); //leaders point down initially so all of the lava doesn't rise at the same time
+    this.maxY = floor(random(30))+height-30;
+  }
+
+  void addDelay(){
+    //positive heading == down, negative heading == up
+    //When at the top or bottom, stall there an extra bit so it looks like it's losing momentum
+    if(this.pos.y > (height-40) && this.vel.heading()>0){
+      this.vel.y += 0.0015;
+    }else if(this.pos.y < 40 && this.vel.heading()<0){
+      this.vel.y -= 0.001;
+    }
+  }
+  
+}
+class Orb{
+
+  int col, blobRadius;
+  PVector vel, pos;
+
+
+  Orb(int xPos, int yPos){
+    this.col = 0;
+    this.pos = new PVector(xPos, yPos);
+    this.blobRadius = 800;
+  }
+  
+  void move(){
+    this.pos.add(this.vel);
+  }
+
+  void addForce(PVector p){
+    this.vel.add(p);
+  }
+
+  void applyField(){
+    int nearX = (int) (this.pos.x - (this.pos.x % spacing));
+    int nearY = (int) (this.pos.y - (this.pos.y % spacing));
+    this.addForce(field[nearX + nearY * width]);
+  }
+    
+  void show(){
+    noFill();
+    stroke(255,255,0);
+    ellipse(this.pos.x, this.pos.y, orbSize*2, 2*orbSize); //location
+    line(this.pos.x, this.pos.y, (this.vel.x*50+this.pos.x), (this.vel.y*50+this.pos.y));  //velocity direction 
+  }
+  
+  void edges(int bottomYLimit){
+    if(this.pos.x > width-orbSize || this.pos.x<orbSize){
+      this.pos.x = this.pos.x<orbSize? orbSize : width-orbSize;
+      vel.x = -vel.x;
+    }
+    if(pos.y > bottomYLimit-orbSize || pos.y<orbSize){
+      this.pos.y = this.pos.y<orbSize? orbSize : bottomYLimit-orbSize;
+    }
+  }
+    
+}
+}
