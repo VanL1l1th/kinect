@@ -5,7 +5,6 @@ int miny;
 int maxy;
 color col=color(255,0,0);
 ArrayList<PVector> points;
-boolean bool=true;
 Blob(int x,int y){
  minx=x; maxx=x; miny=y; maxy=y;
  points= new ArrayList<PVector>();
@@ -41,9 +40,8 @@ boolean isNear(int x,int y){
  }
  void circles(){
    if((maxx-minx)<(maxy-miny)+tol&&(maxx-minx)>(maxy-miny)-tol){
-     if((maxx-minx)*(maxy-miny)*0.7<points.size()){
-     col=color(0,255,0); }
-   else if((maxx-minx)*(maxy-miny)*0.3<points.size()){col=color(0,0,255);}}
+     
+   if((maxx-minx)*(maxy-miny)*0.3<points.size()){col=color(0,0,255);}}
      
  }
  int index(){
